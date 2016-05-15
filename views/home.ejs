@@ -25,7 +25,7 @@
 							<h3 class="light white" id="subheader">Let us tell you who the best professor is for you.</h3>
             	<h3 class="light white" id="tester"></h3>
 							<div class="form-group">
-						    <input class="form-control input-sm" id="inputsm" list="json-datalist" type="text" placeholder = "Enter Professor Name Here">
+						    <input class="form-control input-sm" id="inputsm" list="json-datalist" type="text" placeholder = "Enter Professor &amp; School Here - Then Press ENTER">
                 <datalist id="json-datalist">
 
                 </datalist>
@@ -40,35 +40,36 @@
 	<section id="services" class="section section-padded">
 		<div class="container">
 			<div class="row text-center title">
-				<h2>Services</h2>
-				<h4 class="light muted">Achieve the best results with our wide variety of training options!</h4>
+				<h2 id="prof_name"></h2>
+				<h3 class="light muted"><a href="#intro">Click Here To Search For A Professor</a></h3>
+        <h4 class="light muted"><b></b></h4>
 			</div>
 			<div class="row services">
 				<div class="col-md-4">
 					<div class="service">
 						<div class="icon-holder">
-							<img src="/img/icons/heart-blue.png" alt="" class="icon">
+							<img src="/img/icons/helpfulness.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Cardio Training</h4>
-						<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p>
+						<h4 class="heading">Helpfulness<hr>Search For A Prof To See Rating</h4>
+						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
 					</div>
 				</div>
 				<div class="col-md-4">
 					<div class="service">
 						<div class="icon-holder">
-							<img src="/img/icons/guru-blue.png" alt="" class="icon">
+							<img src="/img/icons/clarity.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Yoga Pilates</h4>
-						<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p>
+						<h4 class="heading">Clarity<hr>Search For A Prof To See Rating</h4>
+						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
 					</div>
 				</div>
 				<div class="col-md-4">
 					<div class="service">
 						<div class="icon-holder">
-							<img src="/img/icons/weight-blue.png" alt="" class="icon">
+							<img src="/img/icons/easiness.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Power Training</h4>
-						<p class="description">A elementum ligula lacus ac quam ultrices a scelerisque praesent vel suspendisse scelerisque a aenean hac montes.</p>
+						<h4 class="heading">Easiness<hr>Search For A Prof To See Rating</h4>
+						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
 					</div>
 				</div>
 			</div>
@@ -281,21 +282,19 @@
 
   <script>
 
+    //Do search on enter
+    $("#inputsm").keyup(function(event){
+      if(event.keyCode == 13){
+        getProfessorResults();
+      }
+    });
 
-  $("#inputsm").keyup(function(event){
-
-
-    if(event.keyCode == 13){
-
-      getProfessorResults();
-
-    }
-
-});
-
+    //Request the ratemyprof data from client -> server
     function getProfessorResults() {
+
+      //Snag the text box input
       var textData = $('#inputsm').val();
-      console.log("Going to query textData:" + textData);
+
       $.ajax({
           url: 'http://localhost:3000/ajaxURL',
           data: { search: textData },
@@ -303,32 +302,58 @@
           cache: false,
           timeout: 5000,
           complete: function(data) {
+
+              //Get the jSON results from the 'API'
               var results = data['responseJSON'];
-
-              var list_append = "";
-
               var availableTags = [];
+
+              //Results counter
               counter = 0;
+
               //Append the data to the textual dropdown on the homepage
               for (var i in results) {
                 counter++;
                 availableTags.push(results[i]);
               }
 
-
+              //Reset the space in the box to populate all results in the dropdown
               $('#inputsm').val(textData[0]);
               $('#inputsm').attr("placeholder", counter + " results for: " + textData);
 
-              $(function() {
+                   $("#inputsm").autocomplete({
+                       source: availableTags,
 
-                 $( "#inputsm" ).autocomplete({
-                   source: availableTags
-                 });
-               });
+                       select: function (e, ui) {
+                         $("#prof_name").html(ui.item.label);
+                       }
+                   });
 
-               var e = jQuery.Event("keydown");
-               e.which = 40;
-               $('#inputsm').trigger('focus').attr('value',' ').trigger(e);
+              //Refocus the input to populate all dropdown items
+              var e = jQuery.Event("keydown");
+              e.which = 40;
+              $('#inputsm').trigger('focus').attr('value',' ').trigger(e);
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              alert('Error connecting to the Node.js server... ' + textStatus + " " + errorThrown);
+          }
+      });
+    }
+
+    function scrapeProfData(prof_name, prof_link) {
+
+      console.log("GOING TO SCRAP FOR " + prof_name);
+      console.log("RATE MY PROF LINK IS " + prof_link);
+
+      $.ajax({
+          url: 'http://localhost:3000/getProfRatingData',
+          data: "SEND DATA HERE",
+          method: 'GET',
+          cache: false,
+          timeout: 5000,
+          complete: function(data) {
+
+            console.log(data);
+            document.getElementById("click_prof").click();
 
           },
           error: function(jqXHR, textStatus, errorThrown) {
@@ -336,7 +361,11 @@
               alert('Error connecting to the Node.js server... ' + textStatus + " " + errorThrown);
           }
       });
+
     }
+
+
+
 
   </script>
 

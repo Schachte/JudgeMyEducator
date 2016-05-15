@@ -13,20 +13,15 @@ var google = require('google');
 app.set('view engine', 'ejs');      //Set the templating engine for ejs
 app.use(express.static('public'));  //Set the default static dir for serving files
 
-
-
-
-
-
-
-
 /*********************
 Section: Linked Routing
 **********************/
 app.get('/', routes.home);      //Home
-app.get('/ajaxURL', routes.ajaxURL);
-app.get('*', routes.notFound);  //404
 app.post('/', routes.home);
+app.get('/ajaxURL', routes.ajaxURL);
+app.get('/getProfRatingData', routes.getProfRatingData);
+app.get('*', routes.notFound);  //404
+
 
 /******************
 Section: Server run
