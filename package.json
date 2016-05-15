@@ -1,0 +1,24 @@
+{
+  "name": "rate_my_professor",
+  "version": "1.0.0",
+  "description": "A utility to quickly find professors and how good they are rated across the country",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryan Schachte",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "cheerio": "^0.20.0",
+    "ddg": "0.0.3",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "global-tunnel": "^1.2.0",
+    "google": "^2.0.0",
+    "google-scraper": "^1.0.3",
+    "request": "^2.72.0",
+    "syncho": "^0.2.5",
+    "underscore": "^1.8.3"
+  }
+}
