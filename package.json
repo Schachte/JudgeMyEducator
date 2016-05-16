@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A utility to quickly find professors and how good they are rated across the country",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "main": "index.js",
   "author": "Ryan Schachte",
