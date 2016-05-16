@@ -41,7 +41,7 @@
 		<div class="container">
 			<div class="row text-center title">
 				<h2 id="prof_name"></h2>
-				<h3 class="light muted"><a href="#intro">Click Here To Search For A Professor</a></h3>
+				<h3 class="light muted"><span id ="overall_rating"><a href="#intro">Click Here To Search For A Professor</a></span></h3>
         <h4 class="light muted"><b></b></h4>
 			</div>
 			<div class="row services">
@@ -50,8 +50,8 @@
 						<div class="icon-holder">
 							<img src="/img/icons/helpfulness.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Helpfulness<hr>Search For A Prof To See Rating</h4>
-						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
+						<h4 class="heading">Helpfulness<hr><span id="helpfulness_rating">Search For A Prof To See Rating</span></h4>
+						<p class="description"><span id="helpfulness_descr"><a href="#intro">Click Here To Search For A Professor</a></span></p>
 					</div>
 				</div>
 				<div class="col-md-4">
@@ -59,8 +59,8 @@
 						<div class="icon-holder">
 							<img src="/img/icons/clarity.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Clarity<hr>Search For A Prof To See Rating</h4>
-						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
+						<h4 class="heading">Clarity<hr><span id="clarity_rating">Search For A Prof To See Rating</span></h4>
+						<p class="description"><span id="clarity_descr"><a href="#intro">Click Here To Search For A Professor</a></span></p>
 					</div>
 				</div>
 				<div class="col-md-4">
@@ -68,8 +68,8 @@
 						<div class="icon-holder">
 							<img src="/img/icons/easiness.png" alt="" class="icon">
 						</div>
-						<h4 class="heading">Easiness<hr>Search For A Prof To See Rating</h4>
-						<p class="description"><a href="#intro">Click Here To Search For A Professor</a></p>
+						<h4 class="heading">Easiness<hr><span id="easiness_rating">Search For A Prof To See Rating</span></h4>
+						<p class="description"><span id="easiness_descr"><a href="#intro">Click Here To Search For A Professor</a></span></p>
 					</div>
 				</div>
 			</div>
@@ -303,17 +303,21 @@
           timeout: 5000,
           complete: function(data) {
 
+
               //Get the jSON results from the 'API'
-              var results = data['responseJSON'];
-              var availableTags = [];
+              var professor_list  = data['responseJSON']['professors'];
+              var link_list       = data['responseJSON']['link_data'];
+
+              //List of all available source data for dropdown
+              var availableTags   = [];
 
               //Results counter
               counter = 0;
 
               //Append the data to the textual dropdown on the homepage
-              for (var i in results) {
+              for (var i in professor_list) {
                 counter++;
-                availableTags.push(results[i]);
+                availableTags.push(professor_list[i]);
               }
 
               //Reset the space in the box to populate all results in the dropdown
@@ -325,6 +329,16 @@
 
                        select: function (e, ui) {
                          $("#prof_name").html(ui.item.label);
+
+
+                         var prof_data_index  = $.inArray(ui.item.value, availableTags);
+                         var prof_name        = professor_list[prof_data_index];
+                         var prof_link        = link_list[prof_data_index];
+
+                         console.log(prof_name);
+                         console.log(prof_link);
+
+                         scrapeProfData(prof_name, prof_link);
                        }
                    });
 
@@ -340,19 +354,34 @@
     }
 
     function scrapeProfData(prof_name, prof_link) {
-
-      console.log("GOING TO SCRAP FOR " + prof_name);
-      console.log("RATE MY PROF LINK IS " + prof_link);
+      console.log("inside scraper code");
 
       $.ajax({
           url: 'http://localhost:3000/getProfRatingData',
-          data: "SEND DATA HERE",
+          data: { professor: prof_name, linker: prof_link },
           method: 'GET',
           cache: false,
           timeout: 5000,
           complete: function(data) {
 
             console.log(data);
+            //Set the overall rating
+            $("#overall_rating").html("Overall Rating<hr>" + data.responseJSON.rating_data[0].overall);
+
+            //Set the helpfulness
+            $("#helpfulness_rating").html(data.responseJSON.rating_data[0].helpfulness);
+
+            //Set the clarity
+            $("#clarity_rating").html(data.responseJSON.rating_data[0].clarity);
+
+            //Set the easiness
+            $("#easiness_rating").html(data.responseJSON.rating_data[0].easiness);
+
+            helpfulnessDescription(data.responseJSON.rating_data[0].helpfulness);
+            clarityDescription(data.responseJSON.rating_data[0].clarity);
+            easinessDescription(data.responseJSON.rating_data[0].easiness);
+
+
             document.getElementById("click_prof").click();
 
           },
@@ -365,10 +394,64 @@
     }
 
 
+  function helpfulnessDescription(rating) {
+
+    var helpfulnessDescription = ""
+
+    if (rating <= 2) {
+      helpfulnessDescription = "This rating suggests the professor is not typically helpful.. Try and pick a different one!";
+      $("#helpfulness_descr").html(helpfulnessDescription);
+    }
+    else if (rating <= 3.8) {
+      helpfulnessDescription = "This rating suggests the professor is pretty helpful! He/She is not the greatest, but it should be ok.";
+      $("#helpfulness_descr").html(helpfulnessDescription);
+    }
+    else {
+      helpfulnessDescription = "This rating suggests the professor is super helpful!! Go for it!";
+      $("#helpfulness_descr").html(helpfulnessDescription);
+    }
+  }
+
+  function clarityDescription(rating) {
+
+    var clarityDescription = ""
+
+    if (rating <= 2) {
+      clarityDescription = "This rating suggests the professor is not typically clear.. Try and pick a different one!";
+      $("#clarity_descr").html(clarityDescription);
+    }
+    else if (rating <= 3.8) {
+      clarityDescription = "This rating suggests the professor is semi-clear.. You should be fine if you pay attention!";
+      $("#clarity_descr").html(clarityDescription);
+    }
+    else {
+      clarityDescription = "This rating suggests the professor is super clear! Go for it!";
+      $("#clarity_descr").html(clarityDescription);
+    }
+
+  }
+
+  function easinessDescription(rating) {
+
+    var easinessDescription = ""
+
+    if (rating <= 2) {
+      easinessDescription = "This rating suggests the professor is not easy at all.. Try and pick a different one!";
+      $("#easiness_descr").html(easinessDescription);
+    }
+    else if (rating <= 3.8) {
+      easinessDescription = "This rating suggests the professor is semi-difficult.. You should be fine if you work hard!";
+      $("#easiness_descr").html(easinessDescription);
+    }
+    else {
+      easinessDescription = "This rating suggests the professor is super easy! Go for it!";
+      $("#easiness_descr").html(easinessDescription);
+    }
+
+  }
+
 
 
   </script>
-
 </body>
-
 </html>
