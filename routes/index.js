@@ -5,9 +5,8 @@ var cheerio         = require('cheerio');
 var google          = require('google');
 var Sync            = require('syncho');
 var completed       = false;
-var express         =         require("express");
-var app             =         express();
-var bodyParser      =         require("body-parser");
+var app             = express();
+var bodyParser      = require("body-parser");
 var Bing            = require('node-bing-api')({ accKey: "MAQhhIVshKb7wYs7KWB0s44VA3F4hV6RurQ69aU/3DI" });
 var prof_list;
 var prof_links;
@@ -15,7 +14,6 @@ var prof_links;
 //Grabbing and parsing body data from AJAX request from client to server
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
 
 //Function to rid of special characters from BING API
 var fix_encoding = function (s) {
@@ -89,6 +87,7 @@ Section: Routing
 //Params: Request to client and servers response
 exports.home = function(req, res) {
 
+  //Render the home template back to the client
   res.render('home', {
     profs: prof_list
   });
@@ -114,8 +113,10 @@ exports.ajaxURL = function(req, res) {
 //Grab the data from ratemyprofessor
 exports.getProfRatingData = function(req, res) {
 
+  //Final callback used to send back the JSON response to the client
   function sendResponseDataToClient(prof_query_string, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, prof_image) {
 
+    //This will hold the encoded data for the name, ratings and prof image to the client
     var completed_rating_object = {
 
         "rating_data":[
@@ -129,32 +130,33 @@ exports.getProfRatingData = function(req, res) {
           }
       ]
     };
+    //Write the response headers back to the client
     res.json(completed_rating_object);
   }
 
-
+  //Fundtion that will use the search query to scrape the professor image from BING and return into JSON response
   function getProfPicture(prof_query_string, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, callback_func) {
 
-    console.log("FINALIZING PICTURE DATA");
+    //Instatiate professor image
     var prof_image = "";
 
+    //Scrape bing api data
     Bing.images(prof_query_string
               , {top: 1}
               , function(error, res, body){
 
+      //Update prof image with first results IMG URL
       prof_image =  body.d.results[0].MediaUrl;
-      console.log(prof_image + " is prof image");
+
+      //Send data to the callback to populate the JSON response
       sendResponseDataToClient(req.query.professor, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, prof_image);
 
     });
 
-
-
-
   }
 
+  //Function that starts the scrape chain
   function scrapeMyStuff(getProfPicFunc) {
-    console.log("SCRAPING DATA NOW");
 
       request(req.query.linker, function(err, resp, body) {
 
@@ -164,23 +166,22 @@ exports.getProfRatingData = function(req, res) {
           //Get the body data of the ratemyprof
           var $ = cheerio.load(body);
 
+          //Populate all of the ratings off the ratemyprof page
           var rating_overall      = $('.grade')[0].children[0].data;
           var rating_helpfulness  = $('.rating')[0].children[0].data;
           var rating_clarity      = $('.rating')[1].children[0].data;
           var rating_easiness     = $('.rating')[2].children[0].data;
 
-
         }
 
+        //Callback to save the rating data across to deal with asychronous calls in the scrape chain
         getProfPicFunc(req.query.initial_query, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, sendResponseDataToClient);
 
       });
     }
 
-
+  //Send the GET request method to get the scraped data
   if (req.method == "GET") {
-    console.log("INITIAL GET REQUEST");
-
     scrapeMyStuff(getProfPicture);
 
   }
