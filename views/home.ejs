@@ -307,7 +307,7 @@
       var textData = $('#inputsm').val();
 
       $.ajax({
-          url: 'http://localhost:3000/ajaxURL',
+          url: '/ajaxURL',
           data: { search: textData },
           method: 'GET',
           cache: false,
@@ -368,7 +368,7 @@
       console.log("inside scraper code");
 
       $.ajax({
-          url: 'http://localhost:3000/getProfRatingData',
+          url: '/getProfRatingData',
           data: { professor: prof_name, linker: prof_link, initial_query: textData },
           method: 'GET',
           cache: false,
