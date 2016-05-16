@@ -2,10 +2,10 @@
   "name": "rate_my_professor",
   "version": "1.0.0",
   "description": "A utility to quickly find professors and how good they are rated across the country",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
+  "main": "index.js",
   "author": "Ryan Schachte",
   "license": "ISC",
   "dependencies": {

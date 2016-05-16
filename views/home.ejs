@@ -5,6 +5,15 @@
 
   <% include ../partials/head.ejs %>
 
+  <style>
+
+    #prof_pic img {
+        box-shadow: 0px 10px 40px #000;
+    }
+
+  </style>
+
+
 </head>
 
 <body>
@@ -40,6 +49,8 @@
 	<section id="services" class="section section-padded">
 		<div class="container">
 			<div class="row text-center title">
+        <span id = "prof_pic"></span>
+        <hr>
 				<h2 id="prof_name"></h2>
 				<h3 class="light muted"><span id ="overall_rating"><a href="#intro">Click Here To Search For A Professor</a></span></h3>
         <h4 class="light muted"><b></b></h4>
@@ -338,7 +349,7 @@
                          console.log(prof_name);
                          console.log(prof_link);
 
-                         scrapeProfData(prof_name, prof_link);
+                         scrapeProfData(prof_name, prof_link, textData);
                        }
                    });
 
@@ -353,12 +364,12 @@
       });
     }
 
-    function scrapeProfData(prof_name, prof_link) {
+    function scrapeProfData(prof_name, prof_link, textData) {
       console.log("inside scraper code");
 
       $.ajax({
           url: 'http://localhost:3000/getProfRatingData',
-          data: { professor: prof_name, linker: prof_link },
+          data: { professor: prof_name, linker: prof_link, initial_query: textData },
           method: 'GET',
           cache: false,
           timeout: 5000,
@@ -376,6 +387,8 @@
 
             //Set the easiness
             $("#easiness_rating").html(data.responseJSON.rating_data[0].easiness);
+
+            $("#prof_pic").html('<img src="'+data.responseJSON.rating_data[0].picture+'" height="250" width="180">');
 
             helpfulnessDescription(data.responseJSON.rating_data[0].helpfulness);
             clarityDescription(data.responseJSON.rating_data[0].clarity);

@@ -114,8 +114,47 @@ exports.ajaxURL = function(req, res) {
 //Grab the data from ratemyprofessor
 exports.getProfRatingData = function(req, res) {
 
+  function sendResponseDataToClient(prof_query_string, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, prof_image) {
 
-  function scrapeMyStuff(callback) {
+    var completed_rating_object = {
+
+        "rating_data":[
+          {
+            "name"        : req.query.professor,
+            "overall"     : rating_overall,
+            "helpfulness" : rating_helpfulness,
+            "clarity"     : rating_clarity,
+            "easiness"    : rating_easiness,
+            "picture"     : prof_image
+          }
+      ]
+    };
+    res.json(completed_rating_object);
+  }
+
+
+  function getProfPicture(prof_query_string, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, callback_func) {
+
+    console.log("FINALIZING PICTURE DATA");
+    var prof_image = "";
+
+    Bing.images(prof_query_string
+              , {top: 1}
+              , function(error, res, body){
+
+      prof_image =  body.d.results[0].MediaUrl;
+      console.log(prof_image + " is prof image");
+      sendResponseDataToClient(req.query.professor, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, prof_image);
+
+    });
+
+
+
+
+  }
+
+  function scrapeMyStuff(getProfPicFunc) {
+    console.log("SCRAPING DATA NOW");
 
       request(req.query.linker, function(err, resp, body) {
 
@@ -130,35 +169,19 @@ exports.getProfRatingData = function(req, res) {
           var rating_clarity      = $('.rating')[1].children[0].data;
           var rating_easiness     = $('.rating')[2].children[0].data;
 
-          var completed_rating_object = {
-
-            "rating_data":[
-              {
-                "name"        : req.query.professor,
-                "overall"     : rating_overall,
-                "helpfulness" : rating_helpfulness,
-                "clarity"     : rating_clarity,
-                "easiness"    : rating_easiness
-              }
-          ]
-        };
-
-          callback(completed_rating_object);
 
         }
+
+        getProfPicFunc(req.query.initial_query, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, sendResponseDataToClient);
 
       });
     }
 
 
   if (req.method == "GET") {
+    console.log("INITIAL GET REQUEST");
 
-    scrapeMyStuff(function(rating_data) {
-
-      res.json(rating_data);
-
-    });
-
+    scrapeMyStuff(getProfPicture);
 
   }
 
