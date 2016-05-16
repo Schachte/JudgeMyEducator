@@ -8,8 +8,10 @@ var completed       = false;
 var app             = express();
 var bodyParser      = require("body-parser");
 var Bing            = require('node-bing-api')({ accKey: "MAQhhIVshKb7wYs7KWB0s44VA3F4hV6RurQ69aU/3DI" });
-var prof_list;
-var prof_links;
+
+
+var prof_list;  //Array to hold the data for the professors that were scraped from the website
+var prof_links; //Array to hold the above's corresponding link data to prof page
 
 //Grabbing and parsing body data from AJAX request from client to server
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -89,6 +91,7 @@ exports.home = function(req, res) {
 
   //Render the home template back to the client
   res.render('home', {
+    //Is this below necessary to send to the client?
     profs: prof_list
   });
 };
@@ -99,12 +102,20 @@ exports.notFound = function(req, res) {
   res.send("<center><h1>404 - This page does not exist</h1></center>");
 };
 
+//This route is responsible for getting the results from bing and using the links to scrape bing on user selection on the client
 exports.ajaxURL = function(req, res) {
 
+  //Probably change this to a POST
   if (req.method == "GET"){
     getProfs(req.query.search + " site:ratemyprofessors.com", function(prof_data, link_data) {
+
+      //Set the list of queries professors to the global var to pass into the callback function
       prof_list = prof_data;
+
+      //Set the list of queries professor links to the global var to pass into the callback function
       prof_links = link_data
+
+      //Send the queries data intoa  JSON response object into the client
       res.json({ professors: prof_list, link_data: prof_links });
     });
   }
@@ -152,7 +163,6 @@ exports.getProfRatingData = function(req, res) {
       sendResponseDataToClient(req.query.professor, rating_overall, rating_helpfulness, rating_clarity, rating_easiness, prof_image);
 
     });
-
   }
 
   //Function that starts the scrape chain
@@ -171,7 +181,6 @@ exports.getProfRatingData = function(req, res) {
           var rating_helpfulness  = $('.rating')[0].children[0].data;
           var rating_clarity      = $('.rating')[1].children[0].data;
           var rating_easiness     = $('.rating')[2].children[0].data;
-
         }
 
         //Callback to save the rating data across to deal with asychronous calls in the scrape chain

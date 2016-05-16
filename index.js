@@ -2,7 +2,6 @@
 /*********************
 Section: Variable init
 **********************/
-
 var express = require('express');    //Utilzie the express framework
 var app = express();                //Represents the express application
 var server_port = 3000;             //Set the local server port for testing
@@ -16,18 +15,13 @@ app.use(express.static('public'));  //Set the default static dir for serving fil
 /*********************
 Section: Linked Routing
 **********************/
-app.get('/', routes.home);      //Home
-app.post('/', routes.home);
-app.get('/ajaxURL', routes.ajaxURL);
+app.get('/', routes.home);            //Home
+app.post('/', routes.home);           //Home [POST]
+app.get('/ajaxURL', routes.ajaxURL);  //Query prof data
 app.get('/getProfRatingData', routes.getProfRatingData);
 app.get('*', routes.notFound);  //404
-
 
 /******************
 Section: Server run
 *******************/
-// app.listen(server_port, function(){
-//   console.log("The application is running on port 3000");
-// });
-
-app.listen(process.env.PORT || 5000);
+app.listen(process.env.PORT || 5000); //PORT is set by environment variable of the Heroku server or local on 5000
